@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "communication_proto";
+option java_outer_classname = "AndroidGRPCCommunication";
+
+package protoCommunication;
+
+service Communication {
+
+  rpc getCurrentState(VoidConfirmation) returns (State);
+  rpc requestStateChange(State) returns (VoidConfirmation);
+
+}
+
+message VoidConfirmation {
+
+  bool isConfirmation = 1;
+
+}
+
+message State {
+
+  // repeated int32 ids = 1;
+  int32 state = 2;
+
+}
