@@ -9,7 +9,7 @@ public class Simulation {
 
     private static Arduino arduino;
     public Communication communication;
-    public static State state;
+    public State state;
     private long lastStateChange;
     private Runnable timer;
 
@@ -70,6 +70,10 @@ public class Simulation {
             }
         });
 
+    }
+
+    public State getState() {
+        return state;
     }
 
     private void changeState(String reason) throws IOException {
