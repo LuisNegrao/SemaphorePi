@@ -13,62 +13,76 @@ import java.net.Socket;
 public class Endpoint2 {
 
     private static final int PORT = 8080;
-    private ServerSocket serverSocket;
-    private Socket clientSocket;
-    private PrintWriter outputToClient;
-    private BufferedReader inputFromClient;
+    private static final int PORT2 = 8081;
+    private static ServerSocket serverSocketLiveData;
+    private static ServerSocket serverSocketRequestData;
+    private static Socket[] clientSocket = new Socket[2];
+    private static PrintWriter[] outputToClient = new PrintWriter[2];
+    private static BufferedReader[] inputFromClient = new BufferedReader[2];
     private Simulation simulation;
 
 
-    public Endpoint2() throws IOException {
+    public Endpoint2(Simulation simulation) throws IOException {
 
-        //this.simulation = state;
+        this.simulation = simulation;
 
         System.out.println("We are up and running");
 
-        this.serverSocket = new ServerSocket(PORT);
-        this.clientSocket = serverSocket.accept();
+        serverSocketLiveData = new ServerSocket(PORT);
+        clientSocket[0] = serverSocketLiveData.accept();
+        System.out.println("We got the first connection!");
 
-        System.out.println("We got a connection!");
 
-        this.outputToClient = new PrintWriter(clientSocket.getOutputStream(), true);
-        this.inputFromClient = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        outputToClient[0] = new PrintWriter(clientSocket[0].getOutputStream(), true);
+        inputFromClient[0] = new BufferedReader(new InputStreamReader(clientSocket[0].getInputStream()));
 
-        String message = "";
+        serverSocketRequestData = new ServerSocket(PORT2);
+        clientSocket[1] = serverSocketRequestData.accept();
+        System.out.println("We got the second connection!");
 
-        while (!message.equals("stop")) {
-            message = inputFromClient.readLine();
 
-            if (message == null) {
-                message = "";
+        outputToClient[1] = new PrintWriter(clientSocket[1].getOutputStream(), true);
+        inputFromClient[1] = new BufferedReader(new InputStreamReader(clientSocket[1].getInputStream()));
+
+
+        int message = -1;
+
+        while (true) {
+            message = inputFromClient[1].read();
+
+            if (message == -1)
                 continue;
+
+            if (message == 0) {
+
+                int nextState = Math.max(simulation.state.getCurrentState() - 1, 0);
+
+                simulation.requestStateChange(nextState);
+
+            } else if (message == 1) {
+                simulation.requestStateChange(simulation.state.getNextState());
             }
 
-            System.out.println(message);
-
-            if (message.equals("fetch_state")) {
-
-                //this.outputToClient.println(state.getState().getCurrentState());
-                this.outputToClient.println(1);
-
-            } else if (message.contains("change_state")){
-
-                //this.simulation.requestStateChange(0);
-
-            } else {
-                this.outputToClient.println("Message not recognised!!");
-            }
         }
 
-        outputToClient.close();
-        inputFromClient.close();
-        serverSocket.close();
-        clientSocket.close();
+        /*outputToClient[0].close();
+        inputFromClient[0].close();
+        outputToClient[1].close();
+        inputFromClient[1].close();
+        serverSocketRequestData.close();
+        serverSocketLiveData.close();
+        clientSocket[0].close();
+        clientSocket[1].close();*/
 
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void sendStatusUpdate(int message) {
+        outputToClient[0].println(message);
+
+    }
+
+/*    public static void main(String[] args) throws IOException {
         new Endpoint2();
-    }
+    }*/
 
 }

@@ -1,10 +1,9 @@
 package com.se.pi;
 
 import com.fazecast.jSerialComm.SerialPort;
-import com.se.android.Endpoint;
+import com.se.android.Endpoint2;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * Hello world!
@@ -23,11 +22,13 @@ public class App {
         System.out.println();
 
         Simulation simulation = new Simulation(arduino, communication, state);
+
         simulation.run();
 
-        final Endpoint server = new Endpoint(simulation);
-        server.start();
-        server.blockUntilShutdown();
+        final Endpoint2 server = new Endpoint2(simulation);
+
+        //Thread.sleep(3000);
+
 
     }
 }
